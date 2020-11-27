@@ -1,14 +1,15 @@
+  
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+from scipy import fft
 def fuente_info(imagen):
     '''Una función que simula una fuente de
     información al importar una imagen y 
     retornar un vector de NumPy con las 
     dimensiones de la imagen, incluidos los
     canales RGB: alto x largo x 3 canales
-
     :param imagen: Una imagen en formato JPG
     :return: un vector de pixeles
     '''
@@ -20,7 +21,6 @@ def rgb_a_bit(imagen):
     '''Convierte los pixeles de base 
     decimal (de 0 a 255) a binaria 
     (de 00000000 a 11111111).
-
     :param imagen: array de una imagen 
     :return: Un vector de (1 x k) bits 'int'
     '''
@@ -42,7 +42,6 @@ def rgb_a_bit(imagen):
 def modulador(bits, fc, mpp,x):
     '''Un método que simula el esquema de 
     modulación digital BPSK.
-
     :param bits: Vector unidimensional de bits
     :param fc: Frecuencia de la portadora en Hz
     :param mpp: Cantidad de muestras por periodo de onda portadora
@@ -88,7 +87,6 @@ def canal_ruidoso(senal_Tx, Pm, SNR):
     señal provieniente de un modulador y un
     valor en decibelios para la relación señal
     a ruido.
-
     :param senal_Tx: El vector del modulador
     :param Pm: Potencia de la señal modulada
     :param SNR: Relación señal-a-ruido en dB
@@ -110,7 +108,6 @@ def demodulador(senal_Rx, portadora, mpp):
     de señales, bajo un esquema BPSK. El criterio
     de demodulación se basa en decodificación por 
     detección de energía.
-
     :param senal_Rx: La señal recibida del canal
     :param portadora: La onda portadora c(t)
     :param mpp: Número de muestras por periodo
@@ -148,7 +145,6 @@ def demodulador(senal_Rx, portadora, mpp):
 def bits_a_rgb(bits_Rx, dimensiones):
     '''Un blque que decodifica el los bits
     recuperados en el proceso de demodulación
-
     :param: Un vector de bits 1 x k 
     :param dimensiones: Tupla con dimensiones de la img.
     :return: Un array con los pixeles reconstruidos
@@ -243,4 +239,35 @@ ax4.set_ylabel('$b^{\prime}(t)$')
 ax4.set_xlabel('$t$ / milisegundos')
 fig.tight_layout()
 plt.show()
-# La señal demodulada
+
+
+# Transformada de Fourier
+
+senal_f = fft(senal_Tx )
+
+# Muestras de la señal
+
+Nm = len(senal_Tx )
+
+# Número de símbolos
+
+Ns = Nm//mpp
+
+# Tiempo del símbolo es igual periodo de la onda portadora
+Tc = 1/fc
+
+# Tiempo entre muestras (período de muestreo)
+Tm = Tc / mpp
+
+# Tiempo de la simulación
+
+T = Ns * Tc
+
+# Espacio de frecuencias
+f = np.linspace(0.0,1.0/(2.9*Tm),Nm//2)
+
+# Gráfica
+plt.plot(f, 2.0/Nm*np.power(np.abs(senal_f[0:Nm//2]),2))
+plt.xlim(0,20000)
+plt.grid()
+plt.show()
